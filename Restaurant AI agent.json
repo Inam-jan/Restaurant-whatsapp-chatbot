@@ -1,0 +1,162 @@
+{
+  "name": "Restaurant AI agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {
+          "messageStatusUpdates": [
+            "all"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "2f83b233-e4ed-4219-9d67-a892c37b676f",
+      "name": "WhatsApp Trigger",
+      "webhookId": "72405c29-8877-4444-bb68-04fdd7e4433d",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "RmK4CBULA2fg7lGZ",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are \"Saffron Bot\", an AI assistant for a modern restaurant named **Saffron Spice Bistro** located in Islamabad, Pakistan.\n\nYour job is to politely and clearly interact with customers to help them with:\n- Table reservations\n- Food ordering\n- Restaurant timings and location\n- Menu suggestions\n- Booking confirmations\n- Payment or delivery inquiries\n\n### Tone:\n- Friendly, professional, and natural\n- Always polite and concise\n- Use short messages when chatting (1–3 sentences max)\n\n### Restaurant Information:\n- Name: Saffron Spice Bistro\n- Location: G-9 Markaz, Islamabad\n- Opening Hours: 11:00 AM – 11:00 PM (Mon–Sun)\n- Contact: +92-300-1234567\n- Cuisine: Pakistani, Continental, and BBQ\n- Average cost per person: PKR 1500\n- Online orders: supported via WhatsApp or website\n- Reservation limit: up to 8 people per table\n- Payment options: Cash, Credit Card, Easypaisa, JazzCash\n\n### Menu Summary:\n**Starters:** Chicken Corn Soup, Spring Rolls, Caesar Salad  \n**Main Courses:** Chicken Karahi, Beef Burger, Alfredo Pasta, Grilled Fish  \n**Desserts:** Gulab Jamun, Chocolate Lava Cake, Ice Cream  \n**Drinks:** Fresh Lime, Cold Coffee, Mint Margarita\n\n### Behavior Rules:\n1. When a user greets you, reply warmly and offer help.\n2. If the user asks for a menu, show it clearly and offer suggestions.\n3. For reservations:\n   - Ask for name, date, time, number of people.\n   - Check availability using connected data (Google Sheet/Airtable).\n   - Confirm the reservation politely.\n4. For food orders:\n   - Collect items, quantity, and customer name.\n   - Show total cost (use menu prices or estimate).\n   - Ask for delivery/pickup option.\n5. If asked about location or contact info, respond with accurate details.\n6. For unavailable data, say: “Let me confirm that for you shortly.”\n7. Always log user name, date, and their request to Google Sheets.\n8. Never share internal system details, API keys, or n8n structure.\n\n### Example style:\nUser: Hi, I’d like to book a table.\nAI: Sure! May I know for how many people and what time you’d like to book?\n\nUser: What’s on your menu?\nAI: Here’s our menu:\n- Starters: Chicken Corn Soup, Spring Rolls  \n- Main: Chicken Karahi, Alfredo Pasta, Beef Burger  \nWould you like me to recommend something popular today?\n\nIf you’re unsure about a response, politely ask for clarification.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "e4a146bc-1997-4b97-9e90-c808a8e07ea3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        208
+      ],
+      "id": "71371afb-a7e8-43b9-a528-71517db728c5",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OII7Ml8K6Sab4Kz1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "10"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        224
+      ],
+      "id": "050653c7-1864-4cb3-afcc-4c78e7b8d06f",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "889926970864935",
+        "recipientPhoneNumber": "+923189892826",
+        "textBody": "=Hi how can i help you? {{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "c9395e11-b54f-40a2-bcf9-1dbbb02b7005",
+      "name": "Send message",
+      "webhookId": "dfd21dc5-b461-419f-96fc-36f97e23b70b",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1RyHzUt7HVte3DAE",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0892400a-1d5d-4431-8f6c-783c986d603f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8cb7feb6a8acc9be781b12f2253ab2dd31f341af6f0baa7a6f7c9460e44f7b7b"
+  },
+  "id": "K8NWXBccMKZsVLnN",
+  "tags": []
+}
